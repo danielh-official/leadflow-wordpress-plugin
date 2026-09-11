@@ -22,6 +22,9 @@ final class Form {
 	}
 
 	public function render(): string {
+        $status = isset( $_GET['leadflow_status'] )
+            ? \sanitize_text_field( \wp_unslash( $_GET['leadflow_status'] ) )
+            : '';
 		ob_start();
 		?>
 		<style>
@@ -41,6 +44,13 @@ final class Form {
 		<section class="leadflow-card">
 			<h2>Request a project quote</h2>
 			<p>Tell us what your business needs and we will follow up.</p>
+            <?php if ( 'success' === $status ) : ?>
+				<p class="leadflow-notice leadflow-notice--success">Thanks. Your enquiry has been recorded.</p>
+			<?php elseif ( 'invalid' === $status ) : ?>
+				<p class="leadflow-notice leadflow-notice--error">Please complete every field with a valid email address.</p>
+			<?php elseif ( 'error' === $status ) : ?>
+				<p class="leadflow-notice leadflow-notice--error">The enquiry could not be saved. Please try again.</p>
+			<?php endif; ?>
 
 			<form class="leadflow-form" action="<?php echo \esc_url( \admin_url( 'admin-post.php' ) ); ?>" method="post">
 				<input type="hidden" name="action" value="leadflow_submit">
