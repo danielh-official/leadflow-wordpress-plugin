@@ -5,6 +5,8 @@ namespace LeadFlow;
 final class Form {
 	public function register_hooks(): void {
 		\add_action( 'init', array( $this, 'register_shortcode' ) );
+		\add_action( 'admin_post_leadflow_submit', array( $this, 'handle_submission' ) );
+		\add_action( 'admin_post_nopriv_leadflow_submit', array( $this, 'handle_submission' ) );
 	}
 
 	public function register_shortcode(): void {
@@ -42,6 +44,7 @@ final class Form {
 
 			<form class="leadflow-form" action="<?php echo \esc_url( \admin_url( 'admin-post.php' ) ); ?>" method="post">
 				<input type="hidden" name="action" value="leadflow_submit">
+                <?php echo \wp_nonce_field( 'leadflow_submit', 'leadflow_nonce', true, false ); ?>
 
 				<div class="leadflow-grid">
 					<div class="leadflow-field">
@@ -74,5 +77,60 @@ final class Form {
 		</section>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+    public function handle_submission(): void {
+		if ( ! isset( $_POST['leadflow_nonce'] ) ) {
+			\wp_die( 'The form token is missing.', 'Invalid request', 403 );
+		}
+
+		$nonce = \sanitize_text_field( \wp_unslash( $_POST['leadflow_nonce'] ) );
+
+		if ( ! \wp_verify_nonce( $nonce, 'leadflow_submit' ) ) {
+			\wp_die( 'The form token is invalid.', 'Invalid request', 403 );
+		}
+
+		$input    = \wp_unslash( $_POST );
+		$name     = isset( $input['leadflow_name'] ) ? \sanitize_text_field( $input['leadflow_name'] ) : '';
+		$email    = isset( $input['leadflow_email'] ) ? \sanitize_email( $input['leadflow_email'] ) : '';
+		$service  = isset( $input['leadflow_service'] ) ? \sanitize_text_field( $input['leadflow_service'] ) : '';
+		$message  = isset( $input['leadflow_message'] ) ? \sanitize_textarea_field( $input['leadflow_message'] ) : '';
+		$services = self::service_labels();
+
+		if ( '' === $name || ! \is_email( $email ) || ! isset( $services[ $service ] ) || '' === $message ) {
+			$this->redirect( 'invalid' );
+		}
+
+		$post_id = \wp_insert_post(
+			array(
+				'post_title'  => \wp_strip_all_tags( \sprintf( '%s - %s', $name, $services[ $service ] ) ),
+				'post_type'   => Post_Type::TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'_leadflow_name'    => $name,
+					'_leadflow_email'   => $email,
+					'_leadflow_service' => $service,
+					'_leadflow_message' => $message,
+				),
+			),
+			true
+		);
+
+		if ( \is_wp_error( $post_id ) ) {
+			$this->redirect( 'error' );
+		}
+
+		$this->redirect( 'success' );
+	}
+
+    private function redirect( string $status ): void {
+		$url = \wp_get_referer();
+
+		if ( ! $url ) {
+			$url = \home_url( '/' );
+		}
+
+		\wp_safe_redirect( \add_query_arg( 'leadflow_status', $status, $url ) );
+		exit;
 	}
 }
