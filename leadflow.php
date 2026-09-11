@@ -7,8 +7,17 @@
  * Text Domain: leadflow
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
-define( 'LEADFLOW_VERSION', '1.0.0' );
+const LEADFLOW_VERSION = '1.0.0';
+
+require_once __DIR__ . '/includes/class-post-type.php';
+require_once __DIR__ . '/includes/class-form.php';
+
+$post_type = new LeadFlow\Post_Type();
+$form      = new LeadFlow\Form();
+
+$post_type->register_hooks();
+$form->register_hooks();
