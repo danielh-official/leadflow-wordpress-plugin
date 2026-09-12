@@ -6,7 +6,7 @@ LeadFlow is a portfolio WordPress plugin for service businesses. It renders a qu
 
 Open the isolated browser demo:
 
-https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/your-github-username/leadflow-wordpress-plugin/main/blueprint.json
+https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/danielh-official/leadflow-wordpress-plugin/main/blueprint.json
 
 Each visitor receives a separate WordPress Playground instance. Demo changes are not shared with other visitors and should not be treated as production data.
 
