@@ -1,0 +1,26 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "login": true,
+  "siteOptions": {
+    "blogname": "LeadFlow Demo"
+  },
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "git:directory",
+        "url": "https://github.com/your-github-username/leadflow-wordpress-plugin",
+        "ref": "HEAD",
+        "refType": "refname"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire '/wordpress/wp-load.php';\n\n$page_id = wp_insert_post( array(\n\t'post_title' => 'Request a Quote',\n\t'post_name' => 'request-a-quote',\n\t'post_content' => '[leadflow_form]',\n\t'post_status' => 'publish',\n\t'post_type' => 'page',\n), true );\n\nif ( ! is_wp_error( $page_id ) ) {\n\tupdate_option( 'show_on_front', 'page' );\n\tupdate_option( 'page_on_front', $page_id );\n}\n\nwp_insert_post( array(\n\t'post_title' => 'Jamie Chen - Website refresh',\n\t'post_status' => 'private',\n\t'post_type' => 'lf_lead',\n\t'meta_input' => array(\n\t\t'_leadflow_name' => 'Jamie Chen',\n\t\t'_leadflow_email' => 'jamie@example.com',\n\t\t'_leadflow_service' => 'website-refresh',\n\t\t'_leadflow_message' => 'We need a faster, mobile-friendly service website.',\n\t),\n), true );"
+    }
+  ]
+}
