@@ -41,6 +41,7 @@ wp-env stop
 - Anonymous nonces are not authentication or complete spam protection.
 - Redirects use the WordPress safe-redirect API.
 - Lead records are not publicly queryable or exposed through the REST API.
+- A honeypot reduces simple bot traffic but does not replace rate limiting or a dedicated anti-spam service in production.
 
 ## Installable ZIP
 

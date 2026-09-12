@@ -37,7 +37,8 @@ final class Form {
 			.leadflow-button { padding: 11px 18px; border: 0; border-radius: 6px; background: #2271b1; color: #fff; cursor: pointer; }
 			.leadflow-notice { margin-bottom: 18px; padding: 12px 14px; border-radius: 6px; }
 			.leadflow-notice--success { background: #edfaef; color: #135e1f; }
-			.leadflow-notice--error { background: #fcf0f1; color: #8a2424; }
+            .leadflow-notice--error { background: #fcf0f1; color: #8a2424; }
+			.leadflow-honeypot { position: absolute; left: -9999px; }
 			@media (max-width: 640px) { .leadflow-grid { grid-template-columns: 1fr; } }
 		</style>
 
@@ -55,6 +56,10 @@ final class Form {
 			<form class="leadflow-form" action="<?php echo \esc_url( \admin_url( 'admin-post.php' ) ); ?>" method="post">
 				<input type="hidden" name="action" value="leadflow_submit">
                 <?php echo \wp_nonce_field( 'leadflow_submit', 'leadflow_nonce', true, false ); ?>
+                <div class="leadflow-honeypot" aria-hidden="true">
+					<label for="leadflow_website">Website</label>
+					<input id="leadflow_website" name="leadflow_website" type="text" tabindex="-1" autocomplete="off">
+				</div>
 
 				<div class="leadflow-grid">
 					<div class="leadflow-field">
@@ -100,12 +105,17 @@ final class Form {
 			\wp_die( 'The form token is invalid.', 'Invalid request', 403 );
 		}
 
-		$input    = \wp_unslash( $_POST );
-		$name     = isset( $input['leadflow_name'] ) ? \sanitize_text_field( $input['leadflow_name'] ) : '';
-		$email    = isset( $input['leadflow_email'] ) ? \sanitize_email( $input['leadflow_email'] ) : '';
-		$service  = isset( $input['leadflow_service'] ) ? \sanitize_text_field( $input['leadflow_service'] ) : '';
-		$message  = isset( $input['leadflow_message'] ) ? \sanitize_textarea_field( $input['leadflow_message'] ) : '';
-		$services = self::service_labels();
+        $input     = \wp_unslash( $_POST );
+		$honeypot  = isset( $input['leadflow_website'] ) ? \sanitize_text_field( $input['leadflow_website'] ) : '';
+		$name      = isset( $input['leadflow_name'] ) ? \sanitize_text_field( $input['leadflow_name'] ) : '';
+		$email     = isset( $input['leadflow_email'] ) ? \sanitize_email( $input['leadflow_email'] ) : '';
+		$service   = isset( $input['leadflow_service'] ) ? \sanitize_text_field( $input['leadflow_service'] ) : '';
+		$message   = isset( $input['leadflow_message'] ) ? \sanitize_textarea_field( $input['leadflow_message'] ) : '';
+		$services  = self::service_labels();
+
+        if ( '' !== $honeypot ) {
+			$this->redirect( 'success' );
+		}
 
 		if ( '' === $name || ! \is_email( $email ) || ! isset( $services[ $service ] ) || '' === $message ) {
 			$this->redirect( 'invalid' );
