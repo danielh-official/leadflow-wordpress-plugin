@@ -10,7 +10,7 @@
       "step": "installPlugin",
       "pluginData": {
         "resource": "git:directory",
-        "url": "https://github.com/your-github-username/leadflow-wordpress-plugin",
+        "url": "https://github.com/danielh-official/leadflow-wordpress-plugin",
         "ref": "HEAD",
         "refType": "refname"
       },
